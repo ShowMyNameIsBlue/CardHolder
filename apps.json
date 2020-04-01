@@ -1,0 +1,18 @@
+{
+  "apps": [
+    {
+      "script": "index.js",
+      "max_memory_restart": "200M",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+      "log_file": "../appLogs/Card_holder/Card_holder-entire.log",
+      "error_file": "../appLogs/Card_holder/Card_holder-err.log",
+      "out_file": "../appLogs/Card_holder-out.log",
+      "name": "Card_holder",
+      "instances": 1,
+      "exec_mode": "cluster",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}
