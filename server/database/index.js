@@ -20,7 +20,7 @@ const formatSql = (sql, dataArr, silent) => {
   return sql;
 };
 
-const query = sql => {
+const query = (sql) => {
   return new Promise((reslove, reject) => {
     pool.getConnection((err, conn) => {
       if (err) return reject(err);
@@ -45,7 +45,7 @@ const getConnection = () => {
       connection.beginTransactionAsync = promisify(connection.beginTransaction);
       connection.queryAsync = promisify(connection.query);
       connection.rollbackAsync = () => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           connection.rollback(() => {
             connection.release();
             resolve();
@@ -54,7 +54,7 @@ const getConnection = () => {
       };
       connection.commitAsync = () => {
         return new Promise((resolve, reject) => {
-          connection.commit(err => {
+          connection.commit((err) => {
             connection.release();
             if (err) return reject(err);
             resolve();
@@ -91,5 +91,5 @@ module.exports = {
   query,
   init,
   hashpasssword,
-  getConnection
+  getConnection,
 };

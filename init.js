@@ -6,7 +6,7 @@ const initData = async () => {
     await db.init();
   } catch (error) {
     console.log(`init database failed`);
-    console.log(e);
+    console.log(error);
   }
 };
 

@@ -2,12 +2,12 @@ const Router = require("koa-router");
 
 const { sessionAuth } = require("../auth");
 
-const test = require("./test");
+const user = require("./user");
 
 const router = new Router({
   prefix: "/api/v0"
 });
 
-router.use("/", test.routes(), test.allowedMethods());
+router.use("/user", user.routes(), user.allowedMethods());
 
 module.exports = router;
