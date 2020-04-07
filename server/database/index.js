@@ -7,7 +7,7 @@ const { promisify } = require("util");
 
 // 哈希密码
 const hashpasssword = async (username, password) => {
-  const cipher = crypto.createCipher("aes192", config.salt);
+  const cipher = crypto.createCipher("aes192", config.common.salt);
   cipher.update(String(username) + String(password));
   return cipher.final("hex");
 };

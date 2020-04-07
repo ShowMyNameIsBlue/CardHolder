@@ -7,18 +7,18 @@ const required = (rules, ctx) => {
   let needCheck = ctx.request[key];
 
   needCheck = Object.assign({}, needCheck);
-  errors = value.filter(check => {
+  errors = value.filter((check) => {
     if (needCheck[check] === undefined) return true;
     return false;
   });
 
   if (errors.length) {
-    throw new HttpError(412, `${errors.join(",")} is required`);
+    ctx.throw(412, `${errors.join(",")} is required`);
   }
 };
 
 // 解析sql错误
-const parseSqlError = err => {
+const parseSqlError = (err) => {
   if (err.sqlMessage) {
     if (err.sqlMessage.includes("Duplicate")) {
       return "唯一性数据冲突";
