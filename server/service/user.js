@@ -11,8 +11,8 @@ const random = require("../utils/random");
 /**
  * 验证密码正确性
  *
- * @param {用户名} username
- * @param {密码} password
+ * @param {username} 用户名
+ * @param {password} 密码
  */
 const checkPassword = async (username, password) => {
   let user = await query(
@@ -67,8 +67,8 @@ exports.create = create;
 /**
  * 登录
  *
- * @param {用户名} username
- * @param {密码} password
+ * @param {username}  用户名
+ * @param {password} 密码
  *
  */
 const login = async ({ username, password }) => {
@@ -77,3 +77,79 @@ const login = async ({ username, password }) => {
   return check;
 };
 exports.login = login;
+
+/**
+ *获取用户信息
+ *
+ * @param {userId}  用户Id
+ * @param {role} 角色
+ *
+ */
+const getUser = async ({ userId, role }) => {
+  const conn = await getConnection();
+  try {
+    let _user = role === "0" ? "customer" : "owner";
+    const user = await conn.queryAsync(
+      formatSql(
+        `select * from user join ${_user} on user.id = userId where user.id = ? and  user.role = ?`,
+        [userId, role]
+      )
+    );
+    const data = user;
+    return { success: true, data, code: 0 };
+  } catch (e) {
+    console.error(e);
+    return e.code && e.msg
+      ? e
+      : {
+          success: false,
+          code: 500,
+          msg: parseSqlError(e) || "user service: 数据库操作失败",
+        };
+  }
+};
+
+exports.getUser = getUser;
+/**
+ *修 改密码
+ * @param {userId, username, oldPwd, newPwd}
+ */
+const changePwd = async ({ userId, username, oldPwd, newPwd }) => {
+  const conn = await getConnection();
+  try {
+    await conn.beginTransactionAsync();
+  } catch (e) {
+    console.error(e);
+    return { success: false, code: 0, msg: "设置修改事务失败" };
+  }
+  try {
+    const result = await checkPassword(username, oldPwd);
+    if (result.match) {
+      const data = await conn.queryAsync(
+        formatSql(`update user set password = ? where id = ?`, [newPwd, userId])
+      );
+      await conn.commitAsync();
+      return { success: true, data, code: 0 };
+    } else {
+      await conn.rollbackAsync();
+      return e.msg && e.code
+        ? e
+        : parseSqlError(e) || {
+            success: false,
+            code: 403,
+            msg: "密码验证失败",
+          };
+    }
+  } catch (e) {
+    console.error(e);
+    await conn.rollbackAsync();
+    return e.msg && e.code
+      ? e
+      : parseSqlError(e) || {
+          success: false,
+          code: 500,
+          msg: "修改事务执行失败",
+        };
+  }
+};
+exports.changePwd = changePwd;

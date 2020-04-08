@@ -2,6 +2,7 @@ const Router = require("koa-router");
 const router = new Router();
 const { required } = require("../utils");
 const User = require("../service/user");
+const { sessionAuth } = require("../auth");
 /**
  * 注册用户
  */
@@ -21,15 +22,17 @@ router.post("/siginup", async (ctx) => {
       code,
     };
   } else {
-    ctx.status = 500;
     ctx.body = {
       code: result.code,
       msg: result.msg,
     };
-    ctx.throw(500, result.msg);
+    ctx.throw(result.code, result.msg);
   }
 });
 
+/**
+ * 登录用户
+ */
 router.post("/sigin", async (ctx) => {
   if (ctx.session.user) {
     ctx.body = { code: 0, data: ctx.session.user };
@@ -56,4 +59,51 @@ router.post("/sigin", async (ctx) => {
     };
   }
 });
+
+/**
+ * 获取用户信息
+ */
+
+router.get("/:id", sessionAuth, async (ctx) => {
+  if (!ctx.params.id) ctx.throw(400, "userId is required");
+  required({ query: ["role"] }, ctx);
+  const { id } = ctx.params;
+  const { role } = ctx.query;
+  const result = await User.getUser({ userId: id, role });
+  if (result.success) {
+    const { data, code } = result;
+    ctx.body = { data, code };
+  } else {
+    ctx.body = {
+      code: result.code,
+      msg: result.msg,
+    };
+    ctx.throw(result.code, result.msg);
+  }
+});
+
+/**
+ * 修改用户信息
+ *
+ */
+
+router.put("/changePwd/:id", sessionAuth, async (ctx) => {
+  if (!ctx.params.id) ctx.throw(400, "userId is required");
+  required({ body: ["username", "oldPwd", "newPwd"] }, ctx);
+  console.log(ctx.body);
+  const { id } = ctx.params;
+  const { username, oldPwd, newPwd } = ctx.request.body;
+  const result = await User.changePwd({ userId: id, username, oldPwd, newPwd });
+  if (result.success) {
+    const { data, code } = result;
+    ctx.body = { data, code };
+  } else {
+    ctx.body = {
+      code: result.code,
+      msg: result.msg,
+    };
+    ctx.throw(result.code, result.msg);
+  }
+});
+
 module.exports = router;
