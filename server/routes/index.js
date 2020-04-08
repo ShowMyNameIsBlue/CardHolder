@@ -4,6 +4,7 @@ const { sessionAuth, customerAuth } = require("../auth");
 
 const user = require("./user");
 const customer = require("./customer");
+const card = require("./card");
 
 const router = new Router({
   prefix: "/api/v0",
@@ -17,5 +18,6 @@ router.use(
   customer.routes(),
   customer.allowedMethods()
 );
+router.use("/card", sessionAuth, card.routes(), card.allowedMethods());
 
 module.exports = router;

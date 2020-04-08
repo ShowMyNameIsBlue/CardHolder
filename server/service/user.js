@@ -59,7 +59,7 @@ const create = async (user) => {
       : {
           success: false,
           code: 500,
-          msg: parseSqlError(e) || "user service: 数据库操作失败",
+          msg: parseSqlError(e) || "user service: 数据库注册用户操作失败",
         };
   }
 };
@@ -88,10 +88,9 @@ exports.login = login;
 const getUser = async ({ userId, role }) => {
   const conn = await getConnection();
   try {
-    let _user = role === "0" ? "customer" : "owner";
     const user = await conn.queryAsync(
       formatSql(
-        `select * from user join ${_user} on user.id = userId where user.id = ? and  user.role = ?`,
+        `select * from user join customer on user.id = userId where user.id = ? and  user.role = ?`,
         [userId, role]
       )
     );
@@ -104,7 +103,7 @@ const getUser = async ({ userId, role }) => {
       : {
           success: false,
           code: 500,
-          msg: parseSqlError(e) || "user service: 数据库操作失败",
+          msg: parseSqlError(e) || "user service: 数据库获取用户操作失败",
         };
   }
 };

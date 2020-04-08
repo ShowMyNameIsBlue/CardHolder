@@ -20,7 +20,7 @@ const create = async ({ name, gender, birthday, area, userId }) => {
       : {
           success: false,
           code: 500,
-          msg: parseSqlError(e) || "user service: 数据库操作失败",
+          msg: parseSqlError(e) || "user service: 数据库创建消费者信息操作失败",
         };
   }
 };
@@ -44,7 +44,7 @@ const ModCustomer = async ({ customerId, detail }) => {
       : {
           success: false,
           code: 500,
-          msg: parseSqlError(e) || "user service: 数据库操作失败",
+          msg: parseSqlError(e) || "user service: 数据库修改消费者信息操作失败",
         };
   }
 };
