@@ -88,13 +88,27 @@ exports.login = login;
 const getUser = async ({ userId, role }) => {
   const conn = await getConnection();
   try {
+    const _cardInfo = await conn.queryAsync(
+      formatSql(`select cardInfo from card where userId = ?`, [userId])
+    );
+    const { cardInfo } = _cardInfo[0];
+    const cardArr = JSON.parse(cardInfo);
+    let sqlStr = "";
+    cardArr.forEach((e) => {
+      sqlStr += `or id = ${e}`;
+    });
+    sqlStr = sqlStr.replace("or", "");
+    const _couponInfo = await conn.queryAsync(
+      formatSql(`select * from coupon where ${sqlStr}`)
+    );
     const user = await conn.queryAsync(
       formatSql(
         `select * from user join customer on user.id = userId where user.id = ? and  user.role = ?`,
         [userId, role]
       )
     );
-    const data = user;
+
+    const data = { user, couponInfo: _couponInfo };
     return { success: true, data, code: 0 };
   } catch (e) {
     console.error(e);
@@ -110,7 +124,7 @@ const getUser = async ({ userId, role }) => {
 
 exports.getUser = getUser;
 /**
- *修 改密码
+ * 修改密码
  * @param {userId, username, oldPwd, newPwd}
  */
 const changePwd = async ({ userId, username, oldPwd, newPwd }) => {

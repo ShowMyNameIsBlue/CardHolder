@@ -7,6 +7,7 @@ const customer = require("./customer");
 const card = require("./card");
 const coupon = require("./coupon");
 const shop = require("./shop");
+const comment = require("./comment");
 
 const router = new Router({
   prefix: "/api/v0",
@@ -35,4 +36,5 @@ router.use(
   shop.routes(),
   shop.allowedMethods()
 );
+router.use("/comment", sessionAuth, comment.routes(), comment.allowedMethods());
 module.exports = router;
