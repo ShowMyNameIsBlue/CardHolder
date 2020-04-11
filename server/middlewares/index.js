@@ -12,7 +12,7 @@ const addBodyParser = (app) => {
       multipart: true,
       formidable: {
         // 初始化项目文件保存位置
-        uploadDir: "/tmp/dists",
+        uploadDir: `${resolve(__dirname, "../../dist")}`,
         keepExtensions: true,
         maxFileSize: 50 * 1024 * 1024, // 设置上传文件大小最大限制，50M
       },

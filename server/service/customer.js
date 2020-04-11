@@ -33,6 +33,8 @@ exports.create = create;
 const ModCustomer = async ({ customerId, detail }) => {
   const conn = await getConnection();
   try {
+    if (JSON.stringify(detail) == "{}")
+      return { success: true, data: {}, code: 0 };
     const data = await conn.queryAsync(
       formatSql(`update customer set ? where id = ?`, [detail, customerId])
     );

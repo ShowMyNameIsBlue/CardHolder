@@ -123,9 +123,13 @@ const changePwd = async ({ userId, username, oldPwd, newPwd }) => {
   }
   try {
     const result = await checkPassword(username, oldPwd);
+    const encrypted = await hashpasssword(username, newPwd);
     if (result.match) {
       const data = await conn.queryAsync(
-        formatSql(`update user set password = ? where id = ?`, [newPwd, userId])
+        formatSql(`update user set password = ? where id = ?`, [
+          encrypted,
+          userId,
+        ])
       );
       await conn.commitAsync();
       return { success: true, data, code: 0 };

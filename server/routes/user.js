@@ -107,3 +107,15 @@ router.put("/changePwd/:id", sessionAuth, async (ctx) => {
 });
 
 module.exports = router;
+
+/**
+ * 退出登录
+ */
+router.post("/exit", sessionAuth, async (ctx) => {
+  if (ctx.session.user) {
+    delete ctx.session.user;
+    return { data: "ok", code: 0 };
+  } else {
+    ctx.throw(401, "用户未登录");
+  }
+});

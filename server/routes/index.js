@@ -1,10 +1,12 @@
 const Router = require("koa-router");
 
-const { sessionAuth, customerAuth } = require("../auth");
+const { sessionAuth, customerAuth, ownerAuth } = require("../auth");
 
 const user = require("./user");
 const customer = require("./customer");
 const card = require("./card");
+const coupon = require("./coupon");
+const shop = require("./shop");
 
 const router = new Router({
   prefix: "/api/v0",
@@ -19,5 +21,18 @@ router.use(
   customer.allowedMethods()
 );
 router.use("/card", sessionAuth, card.routes(), card.allowedMethods());
-
+router.use(
+  "/coupon",
+  sessionAuth,
+  ownerAuth,
+  coupon.routes(),
+  coupon.allowedMethods()
+);
+router.use(
+  "/shop",
+  sessionAuth,
+  ownerAuth,
+  shop.routes(),
+  shop.allowedMethods()
+);
 module.exports = router;

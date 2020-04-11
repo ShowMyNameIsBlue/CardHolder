@@ -56,6 +56,8 @@ exports.getCardInfo = getCardInfo;
 const modCardInfo = async ({ userId, detail }) => {
   const conn = await getConnection();
   try {
+    if (JSON.stringify(detail) == "{}")
+      return { success: true, data: {}, code: 0 };
     const data = await conn.queryAsync(
       formatSql(`update card set ? where userId = ?`, [detail, userId])
     );
