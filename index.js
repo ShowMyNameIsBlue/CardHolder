@@ -9,7 +9,7 @@ const config = require("./server/config/dev");
     console.info("SIGINT signal received.");
 
     // Stops the server from accepting new connections and finishes existing connections.
-    server.close(function(err) {
+    server.close(function (err) {
       if (err) {
         console.error(err);
         process.exit(1);

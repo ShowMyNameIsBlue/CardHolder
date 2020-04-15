@@ -6,7 +6,6 @@ const Coupon = require("../service/coupon");
 router.post("/create", async (ctx) => {
   required({ body: ["name", "start", "end", "count", "type", "shopId"] }, ctx);
   const { name, number, start, end, count, type, shopId } = ctx.request.body;
-  console.log(ctx.request.files);
   const { path } = ctx.request.files[""];
   const result = await Coupon.create({
     name,
