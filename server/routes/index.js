@@ -9,6 +9,7 @@ const coupon = require("./coupon");
 const shop = require("./shop");
 const comment = require("./comment");
 const activity = require("./activity");
+const order = require("./order");
 
 const router = new Router({
   prefix: "/api/v0",
@@ -44,5 +45,6 @@ router.use(
   activity.routes(),
   activity.allowedMethods()
 );
+router.use("/order", sessionAuth, order.routes(), order.allowedMethods());
 
 module.exports = router;

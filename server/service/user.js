@@ -93,14 +93,19 @@ const getUser = async ({ userId, role }) => {
     );
     const { cardInfo } = _cardInfo[0];
     const cardArr = JSON.parse(cardInfo);
-    let sqlStr = "";
-    cardArr.forEach((e) => {
-      sqlStr += `or id = ${e}`;
-    });
-    sqlStr = sqlStr.replace("or", "");
-    const _couponInfo = await conn.queryAsync(
-      formatSql(`select * from coupon where ${sqlStr}`)
-    );
+    let _couponInfo;
+    if (cardArr.length == 0) {
+      _couponInfo = [];
+    } else {
+      let sqlStr = "";
+      cardArr.forEach((e) => {
+        sqlStr += `or id = ${e}`;
+      });
+      sqlStr = sqlStr.replace("or", "");
+      _couponInfo = await conn.queryAsync(
+        formatSql(`select * from coupon where ${sqlStr}`)
+      );
+    }
     const user = await conn.queryAsync(
       formatSql(
         `select * from user join customer on user.id = userId where user.id = ? and  user.role = ?`,
