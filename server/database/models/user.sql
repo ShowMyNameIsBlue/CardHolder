@@ -8,6 +8,5 @@ CREATE TABLE IF NOT EXISTS  `user` (
   `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`),
   INDEX `uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4

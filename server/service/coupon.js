@@ -1,6 +1,5 @@
 const { getConnection, formatSql } = require("../database");
 const { parseSqlError } = require("../utils");
-
 /**
  * 创建卡券信息
  * @param {name, number, start, end, count, type, shopId}
@@ -18,10 +17,11 @@ const create = async ({
 }) => {
   const conn = await getConnection();
   try {
+    const body = imgPath
+      ? { name, number, start, end, count, type, shopId, imgPath }
+      : { name, number, start, end, count, type, shopId };
     const data = await conn.queryAsync(
-      formatSql(`insert into coupon set ?`, [
-        { name, number, start, end, count, type, shopId, imgPath },
-      ])
+      formatSql(`insert into coupon set ?`, [body])
     );
     return { success: true, data, code: 0 };
   } catch (e) {
@@ -72,6 +72,10 @@ exports.modCoupon = modCoupon;
 const delCoupon = async ({ couponId }) => {
   const conn = await getConnection();
   try {
+    const _path = await query(
+      formatSql(`select imgPath from coupon where id = ?`, [couponId])
+    );
+    const { imgPath } = _path[0];
     const data = await conn.queryAsync(
       formatSql(`delete from coupon where id = ?`, [couponId])
     );
@@ -89,3 +93,24 @@ const delCoupon = async ({ couponId }) => {
 };
 
 exports.delCoupon = delCoupon;
+
+const getCoupon = async ({ couponId }) => {
+  const conn = await getConnection();
+  try {
+    const data = await conn.queryAsync(
+      formatSql(`select * from coupon where id = ?`, [couponId])
+    );
+    return { success: true, data, code: 0 };
+  } catch (e) {
+    console.error(e);
+    return e.msg && e.code
+      ? e
+      : {
+          success: false,
+          code: 500,
+          msg: parseSqlError(e) || "user service: 数据库获取卡信息操作失败",
+        };
+  }
+};
+
+exports.getCoupon = getCoupon;

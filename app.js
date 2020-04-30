@@ -1,9 +1,11 @@
 const Koa = require("koa");
 const router = require("./server/routes");
-
+const static = require("koa-static");
+const path = require("path");
 const { addsession, addBodyParser } = require("./server/middlewares");
 const app = new Koa();
 addsession(app);
 addBodyParser(app);
+app.use(static(path.join(__dirname, "./dist")));
 app.use(router.routes());
 module.exports = app;

@@ -2,14 +2,14 @@ const { formatSql, query, getConnection } = require("../database");
 const { parseSqlError } = require("../utils");
 /**
  * 创建消费者信息
- * @param {name, gender, birthday, area, userId }
+ * @param {name, gender, number, area, userId }
  */
-const create = async ({ name, gender, birthday, area, userId }) => {
+const create = async ({ name, gender, number, area, userId }) => {
   const conn = await getConnection();
   try {
     const data = await conn.queryAsync(
       formatSql(`insert into customer set ?`, [
-        { name, gender, birthday, area, userId },
+        { name, gender, number, area, userId },
       ])
     );
     return { success: true, data, code: 0 };

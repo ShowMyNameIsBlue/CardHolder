@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS  `order` (
   `userId` int(11) NOT NULL,
   `start` datetime NOT NULL,
   `end` datetime NOT NULL,
+   `status` int(1) NOT NULL DEFAULT 0,
   `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)

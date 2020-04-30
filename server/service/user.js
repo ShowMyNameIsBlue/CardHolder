@@ -14,14 +14,17 @@ const random = require("../utils/random");
  * @param {username} 用户名
  * @param {password} 密码
  */
-const checkPassword = async (username, password) => {
+const checkPassword = async (username, password, role) => {
   let user = await query(
-    formatSql(`select * from user where username = ?`, [username])
+    formatSql(`select * from user where username = ? and role = ?`, [
+      username,
+      role,
+    ])
   );
   if (user.length) {
     const encrypted = await hashpasssword(username, password);
     user = user[0];
-    if (encrypted === user.password) {
+    if (encrypted === user.password && user.role == role) {
       delete user.password;
       return { match: true, user };
     }
@@ -37,21 +40,31 @@ const create = async (user) => {
   const conn = await getConnection();
   try {
     const { username, password, role, code } = user;
-    const encrypted = await hashpasssword(username, password);
-    const uid = random(12, "number");
-    const _user = await conn.queryAsync(
-      formatSql(`insert into user set ?`, [
-        {
-          username,
-          password: encrypted,
-          uid,
-          role,
-          code,
-        },
+    const _user = await query(
+      formatSql(`select * from user where username =? and role = ?`, [
+        username,
+        role,
       ])
     );
-    const data = _user;
-    return { success: true, data, code: 0 };
+    if (_user.length) {
+      return { success: false, msg: "用户名重复", code: 401 };
+    } else {
+      const encrypted = await hashpasssword(username, password);
+      const uid = random(12, "number");
+      const _user = await conn.queryAsync(
+        formatSql(`insert into user set ?`, [
+          {
+            username,
+            password: encrypted,
+            uid,
+            role,
+            code,
+          },
+        ])
+      );
+      const data = _user;
+      return { success: true, data, code: 0 };
+    }
   } catch (e) {
     console.error(e);
     return e.code && e.msg
@@ -71,8 +84,8 @@ exports.create = create;
  * @param {password} 密码
  *
  */
-const login = async ({ username, password }) => {
-  const check = await checkPassword(username, password);
+const login = async ({ username, password, role }) => {
+  const check = await checkPassword(username, password, role);
   if (!check.match) return { match: false };
   return check;
 };
@@ -132,7 +145,7 @@ exports.getUser = getUser;
  * 修改密码
  * @param {userId, username, oldPwd, newPwd}
  */
-const changePwd = async ({ userId, username, oldPwd, newPwd }) => {
+const changePwd = async ({ userId, username, oldPwd, newPwd, role }) => {
   const conn = await getConnection();
   try {
     await conn.beginTransactionAsync();
@@ -141,7 +154,7 @@ const changePwd = async ({ userId, username, oldPwd, newPwd }) => {
     return { success: false, code: 0, msg: "设置修改事务失败" };
   }
   try {
-    const result = await checkPassword(username, oldPwd);
+    const result = await checkPassword(username, oldPwd, role);
     const encrypted = await hashpasssword(username, newPwd);
     if (result.match) {
       const data = await conn.queryAsync(

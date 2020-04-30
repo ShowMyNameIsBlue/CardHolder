@@ -1,14 +1,16 @@
-const { formatSql, getConnection } = require("../database");
+const { formatSql, getConnection, query } = require("../database");
 const { parseSqlError } = require("../utils");
 /**
  * 创建新的商店信息
  * @param {name, area, type, desc, cardInfo, userId}
  */
-const create = async ({ name, area, type, desc, userId }) => {
+const create = async ({ name, area, type, desc, userId, path }) => {
   const conn = await getConnection();
   try {
     const data = await conn.queryAsync(
-      formatSql(`insert into shop set ?`, [{ name, area, type, desc, userId }])
+      formatSql(`insert into shop set ?`, [
+        { name, area, type, desc, userId, imgPath: path },
+      ])
     );
     return { success: true, data, code: 0 };
   } catch (e) {
@@ -28,12 +30,13 @@ exports.create = create;
  * 获取商店信息
  * @param {shopId ,limit,skip}
  */
-const getShop = async ({ shopId, limit, skip }) => {
+const getShop = async ({ shopId, type, limit, skip }) => {
   const conn = await getConnection();
   try {
+    const sql = type == 2 ? "" : `and c.type=${type}`;
     const _total = await conn.queryAsync(
       formatSql(
-        `select count(*) as total from  shop join coupon on shop.id = coupon.shopId where shop.id =?`,
+        `select count(*) as total from  shop as s join coupon as c on s.id = c.shopId where s.id =? ${sql}`,
         [shopId]
       )
     );
@@ -41,7 +44,7 @@ const getShop = async ({ shopId, limit, skip }) => {
     if (total && total > skip) {
       const data = await conn.queryAsync(
         formatSql(
-          `select * from shop join coupon on shop.id = coupon.shopId where shop.id =? limit ?, ?`,
+          ` select  s.id as sid,s.name as sname, s.area,s.type as stype,s.desc,userId,s.imgPath simgPath,c.id as cid,c.name as cname,c.start,c.end,count ,c.imgPath as cimgPath,c.type as ctype,c.shopId from shop as s join coupon as c on s.id = c.shopId where s.id = ? ${sql} limit ?, ?`,
           [shopId, skip, limit]
         )
       );

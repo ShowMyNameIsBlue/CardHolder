@@ -10,19 +10,14 @@ const shop = require("./shop");
 const comment = require("./comment");
 const activity = require("./activity");
 const order = require("./order");
+const upload = require("./upload");
 
 const router = new Router({
   prefix: "/api/v0",
 });
 
 router.use("/user", user.routes(), user.allowedMethods());
-router.use(
-  "/customer",
-  sessionAuth,
-  customerAuth,
-  customer.routes(),
-  customer.allowedMethods()
-);
+router.use("/customer", customer.routes(), customer.allowedMethods());
 router.use("/card", sessionAuth, card.routes(), card.allowedMethods());
 router.use(
   "/coupon",
@@ -46,5 +41,6 @@ router.use(
   activity.allowedMethods()
 );
 router.use("/order", sessionAuth, order.routes(), order.allowedMethods());
+router.use("/util", upload.routes(), upload.allowedMethods());
 
 module.exports = router;

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS  `shop` (
   `type` varchar(100),
   `desc`  TEXT NOT NULL,
    `userId` int(11) NOT NULL,
+   `imgPath` varchar(200),
   `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)

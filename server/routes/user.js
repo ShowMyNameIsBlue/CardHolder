@@ -40,12 +40,12 @@ router.post("/sigin", async (ctx) => {
   }
   required(
     {
-      body: ["username", "password"],
+      body: ["username", "password", "role"],
     },
     ctx
   );
-  const { username, password } = ctx.request.body;
-  const result = await User.login({ username, password });
+  const { username, password, role } = ctx.request.body;
+  const result = await User.login({ username, password, role });
   if (result.match) {
     const { user } = result;
     delete user.password;
@@ -89,11 +89,16 @@ router.get("/:id", sessionAuth, async (ctx) => {
 
 router.put("/changePwd/:id", sessionAuth, async (ctx) => {
   if (!ctx.params.id) ctx.throw(400, "userId is required");
-  required({ body: ["username", "oldPwd", "newPwd"] }, ctx);
-  console.log(ctx.body);
+  required({ body: ["username", "oldPwd", "newPwd", "role"] }, ctx);
   const { id } = ctx.params;
-  const { username, oldPwd, newPwd } = ctx.request.body;
-  const result = await User.changePwd({ userId: id, username, oldPwd, newPwd });
+  const { username, oldPwd, newPwd, role } = ctx.request.body;
+  const result = await User.changePwd({
+    userId: id,
+    username,
+    oldPwd,
+    newPwd,
+    role,
+  });
   if (result.success) {
     const { data, code } = result;
     ctx.body = { data, code };

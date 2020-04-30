@@ -4,12 +4,12 @@ const { required } = require("../utils");
 const Customer = require("../service/customer");
 
 router.post("/create", async (ctx) => {
-  required({ body: ["name", "gender", "birthday", "area", "userId"] }, ctx);
-  const { name, gender, birthday, area, userId } = ctx.request.body;
+  required({ body: ["name", "gender", "area", "userId"] }, ctx);
+  const { name, gender, number, area, userId } = ctx.request.body;
   const result = await Customer.create({
     name,
     gender,
-    birthday,
+    number,
     area,
     userId,
   });

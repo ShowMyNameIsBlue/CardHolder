@@ -4,9 +4,9 @@ const Shop = require("../service/shop");
 const { required } = require("../utils");
 
 router.post("/create", async (ctx) => {
-  required({ body: ["name", "area", "type", "desc", "userId"] }, ctx);
-  const { name, area, type, desc, userId } = ctx.request.body;
-  const result = await Shop.create({ name, area, type, desc, userId });
+  required({ body: ["name", "area", "type", "desc", "userId", "path"] }, ctx);
+  const { name, area, type, desc, userId, path } = ctx.request.body;
+  const result = await Shop.create({ name, area, type, desc, userId, path });
   if (result.success) {
     const { data, code } = result;
     ctx.body = { data, code };
@@ -21,10 +21,12 @@ router.post("/create", async (ctx) => {
 
 router.get("/:id", async (ctx) => {
   if (!ctx.params.id) ctx.throw(400, "shopId is required");
-  const skip = parseInt(ctx.params.skip, 10) || 0;
-  const limit = parseInt(ctx.params.limit, 10) || 10;
+  const skip = parseInt(ctx.query.skip, 10) || 0;
+  const limit = parseInt(ctx.query.limit, 10) || 10;
   const shopId = ctx.params.id;
-  const result = await Shop.getShop({ shopId, limit, skip });
+  required({ query: ["type"] }, ctx);
+  const type = parseInt(ctx.query.type);
+  const result = await Shop.getShop({ shopId, type, limit, skip });
   if (result.success) {
     const { total, data, skip, limit, code } = result;
     ctx.body = { total, data, skip, limit, code };
