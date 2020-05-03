@@ -98,3 +98,27 @@ const delActivity = async ({ activityId }) => {
 };
 
 exports.delActivity = delActivity;
+
+const getActImage = async (activityId) => {
+  const conn = await getConnection();
+  activityId = activityId ? `where a.id =${activityId}` : "";
+  try {
+    const data = await conn.queryAsync(
+      formatSql(
+        `select a.id , a.name ,couponId,a.shopId ,a.start,a.end,a.desc,c.imgPath from activity as a join coupon as c on a.couponId = c.id  ${activityId}`
+      )
+    );
+    return { success: true, data, code: 0 };
+  } catch (e) {
+    console.error(e);
+    return e.msg && e.code
+      ? e
+      : {
+          success: false,
+          code: 500,
+          msg: parseSqlError(e) || "user service: 数据库获取活动信息操作失败",
+        };
+  }
+};
+
+exports.getActImage = getActImage;

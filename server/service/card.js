@@ -53,15 +53,41 @@ exports.getCardInfo = getCardInfo;
  * 修改卡信息
  * @param {userId, detail}
  */
-const modCardInfo = async ({ userId, detail }) => {
+const modCardInfo = async ({ userId, shopId, couponId, detail }) => {
   const conn = await getConnection();
   try {
-    if (JSON.stringify(detail) == "{}")
-      return { success: true, data: {}, code: 0 };
-    const data = await conn.queryAsync(
-      formatSql(`update card set ? where userId = ?`, [detail, userId])
+    const _total = await conn.queryAsync(
+      formatSql(`select * from card where userId =  ?`, [userId])
     );
-    return { success: true, data, code: 0 };
+    if (_total.length) {
+      let { cardInfo } = _total[0];
+      cardInfo = JSON.parse(cardInfo);
+      cardInfo.push(detail);
+      cardInfo = JSON.stringify(cardInfo);
+      const data = await conn.queryAsync(
+        formatSql(`update card set ? where userId = ?`, [{ cardInfo }, userId])
+      );
+      await conn.queryAsync(
+        formatSql(
+          `update coupon set usecount=usecount+1 where id =? and shopId=?`,
+          [couponId, shopId]
+        )
+      );
+      return { success: true, data, code: 0 };
+    } else {
+      const data = await conn.queryAsync(
+        formatSql(`insert into card set ?`, [
+          { userId, cardInfo: JSON.stringify([detail]) },
+        ])
+      );
+      await conn.queryAsync(
+        formatSql(
+          `update coupon set usecount=usecount+1 where id =? and shopId=?`,
+          [couponId, shopId]
+        )
+      );
+      return { success: true, data, code: 0 };
+    }
   } catch (e) {
     console.error(e);
     return e.msg && e.code

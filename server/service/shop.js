@@ -126,3 +126,68 @@ const delShop = async ({ shopId }) => {
 };
 
 exports.delShop = delShop;
+
+const getShopDetail = async ({ shopId }) => {
+  const conn = await getConnection();
+  try {
+    const data = await conn.queryAsync(
+      formatSql(`select *  from shop where id = ?`, [shopId])
+    );
+    return { success: true, data, code: 0 };
+  } catch (e) {
+    await conn.rollbackAsync();
+    console.error(e);
+    return e.msg && e.code
+      ? e
+      : {
+          success: false,
+          code: 500,
+          msg: parseSqlError(e) || "user service: 数据库删除商店信息操作失败",
+        };
+  }
+};
+
+exports.getShopDetail = getShopDetail;
+
+const getShoplist = async () => {
+  const conn = await getConnection();
+  try {
+    const data = await conn.queryAsync(formatSql(`select *  from shop `, []));
+    return { success: true, data, code: 0 };
+  } catch (e) {
+    await conn.rollbackAsync();
+    console.error(e);
+    return e.msg && e.code
+      ? e
+      : {
+          success: false,
+          code: 500,
+          msg: parseSqlError(e) || "user service: 数据库获取商店信息操作失败",
+        };
+  }
+};
+
+exports.getShoplist = getShoplist;
+
+const shopSearch = async ({ key }) => {
+  const conn = await getConnection();
+  try {
+    key = `%${key}%`;
+    const data = await conn.queryAsync(
+      formatSql(`select *  from shop where name like ?`, [key])
+    );
+    return { success: true, data, code: 0 };
+  } catch (e) {
+    await conn.rollbackAsync();
+    console.error(e);
+    return e.msg && e.code
+      ? e
+      : {
+          success: false,
+          code: 500,
+          msg: parseSqlError(e) || "user service: 数据库获取商店信息操作失败",
+        };
+  }
+};
+
+exports.shopSearch = shopSearch;

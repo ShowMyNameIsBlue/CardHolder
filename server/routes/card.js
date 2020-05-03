@@ -37,9 +37,14 @@ router.get("/:id", async (ctx) => {
 
 router.put("/:id", async (ctx) => {
   if (!ctx.params.id) ctx.throw(400, "userId is required");
-  const detail = ctx.request.body;
+  const { shopId, couponId, cardInfo } = ctx.request.body;
   const userId = ctx.params.id;
-  const result = await Card.modCardInfo({ userId, detail });
+  const result = await Card.modCardInfo({
+    userId,
+    detail: cardInfo,
+    shopId,
+    couponId,
+  });
   if (result.success) {
     const { data, code } = result;
     ctx.body = { data, code };

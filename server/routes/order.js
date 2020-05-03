@@ -5,9 +5,19 @@ const Order = require("../service/order");
 const { customerAuth } = require("../auth");
 
 router.post("/create", customerAuth, async (ctx) => {
-  required({ body: ["userId", "shopId", "start", "end"] }, ctx);
-  const { userId, shopId, start, end } = ctx.request.body;
-  const result = await Order.create({ userId, shopId, start, end });
+  required(
+    { body: ["userId", "shopId", "start", "end", "content", "username"] },
+    ctx
+  );
+  const { userId, shopId, start, end, content, username } = ctx.request.body;
+  const result = await Order.create({
+    userId,
+    shopId,
+    start,
+    end,
+    content,
+    username,
+  });
   if (result.success) {
     const { data, code } = result;
     ctx.body = { data, code };
@@ -54,4 +64,20 @@ router.delete("/:id", customerAuth, async (ctx) => {
   }
 });
 
+router.put("/:id", customerAuth, async (ctx) => {
+  if (!ctx.params.id) ctx.throw(400, "orderId is required");
+  const orderId = ctx.params.id;
+  const detail = ctx.request.body;
+  const result = await Order.modOrder({ orderId, detail });
+  if (result.success) {
+    const { data, code } = result;
+    ctx.body = { data, code };
+  } else {
+    ctx.body = {
+      code: result.code,
+      msg: result.msg,
+    };
+    ctx.throw(result.code, result.msg);
+  }
+});
 module.exports = router;

@@ -19,6 +19,34 @@ router.post("/create", async (ctx) => {
   }
 });
 
+router.get("/list", async (ctx) => {
+  const result = await Shop.getShoplist();
+  if (result.success) {
+    const { data, code } = result;
+    ctx.body = { data, code };
+  } else {
+    ctx.body = {
+      code: result.code,
+      msg: result.msg,
+    };
+    ctx.throw(result.code, result.msg);
+  }
+});
+router.get("/search", async (ctx) => {
+  required({ query: ["key"] }, ctx);
+  const { key } = ctx.query;
+  const result = await Shop.shopSearch({ key });
+  if (result.success) {
+    const { data, code } = result;
+    ctx.body = { data, code };
+  } else {
+    ctx.body = {
+      code: result.code,
+      msg: result.msg,
+    };
+    ctx.throw(result.code, result.msg);
+  }
+});
 router.get("/:id", async (ctx) => {
   if (!ctx.params.id) ctx.throw(400, "shopId is required");
   const skip = parseInt(ctx.query.skip, 10) || 0;
@@ -44,6 +72,22 @@ router.put("/:id", async (ctx) => {
   const detail = ctx.request.body;
   const shopId = ctx.params.id;
   const result = await Shop.modshop({ shopId, detail });
+  if (result.success) {
+    const { data, code } = result;
+    ctx.body = { data, code };
+  } else {
+    ctx.body = {
+      code: result.code,
+      msg: result.msg,
+    };
+    ctx.throw(result.code, result.msg);
+  }
+});
+
+router.get("/detail/:id", async (ctx) => {
+  if (!ctx.params.id) ctx.throw(400, "shopId is required");
+  const shopId = ctx.params.id;
+  const result = await Shop.getShopDetail({ shopId });
   if (result.success) {
     const { data, code } = result;
     ctx.body = { data, code };
