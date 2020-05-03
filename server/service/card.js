@@ -1,13 +1,12 @@
-const { getConnection, formatSql } = require("../database");
+const { query, formatSql } = require("../database");
 const { parseSqlError } = require("../utils");
 /**
  * 创建用户卡信息
  * @param {userId, cardInfo}
  */
 const create = async ({ userId, cardInfo }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`insert into card set ?`, [{ userId, cardInfo }])
     );
     return { success: true, data, code: 0 };
@@ -30,9 +29,8 @@ exports.create = create;
  * @param {userId}
  */
 const getCardInfo = async ({ userId }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`select * from card where userId =  ?`, [userId])
     );
     return { success: true, data, code: 0 };
@@ -54,9 +52,8 @@ exports.getCardInfo = getCardInfo;
  * @param {userId, detail}
  */
 const modCardInfo = async ({ userId, shopId, couponId, detail }) => {
-  const conn = await getConnection();
   try {
-    const _total = await conn.queryAsync(
+    const _total = await query(
       formatSql(`select * from card where userId =  ?`, [userId])
     );
     if (_total.length) {
@@ -64,10 +61,10 @@ const modCardInfo = async ({ userId, shopId, couponId, detail }) => {
       cardInfo = JSON.parse(cardInfo);
       cardInfo.push(detail);
       cardInfo = JSON.stringify(cardInfo);
-      const data = await conn.queryAsync(
+      const data = await query(
         formatSql(`update card set ? where userId = ?`, [{ cardInfo }, userId])
       );
-      await conn.queryAsync(
+      await query(
         formatSql(
           `update coupon set usecount=usecount+1 where id =? and shopId=?`,
           [couponId, shopId]
@@ -75,12 +72,12 @@ const modCardInfo = async ({ userId, shopId, couponId, detail }) => {
       );
       return { success: true, data, code: 0 };
     } else {
-      const data = await conn.queryAsync(
+      const data = await query(
         formatSql(`insert into card set ?`, [
           { userId, cardInfo: JSON.stringify([detail]) },
         ])
       );
-      await conn.queryAsync(
+      await query(
         formatSql(
           `update coupon set usecount=usecount+1 where id =? and shopId=?`,
           [couponId, shopId]

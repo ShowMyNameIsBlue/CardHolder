@@ -1,4 +1,4 @@
-const { getConnection, formatSql, query } = require("../database");
+const { query, formatSql } = require("../database");
 const { parseSqlError } = require("../utils");
 
 /**
@@ -6,9 +6,8 @@ const { parseSqlError } = require("../utils");
  * @param { userId, shopId, start, end}
  */
 const create = async ({ userId, username, shopId, start, end, content }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`insert into \`order\` set ?`, [
         { userId, shopId, start, end, content, username },
       ])
@@ -29,10 +28,9 @@ const create = async ({ userId, username, shopId, start, end, content }) => {
 exports.create = create;
 
 const getOrderInfo = async ({ id, type }) => {
-  const conn = await getConnection();
   try {
     const target = type == 0 ? "userId" : "shopId";
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`select * from \`order\` where ${target} =  ?`, [id])
     );
     return { success: true, data, code: 0 };
@@ -51,9 +49,8 @@ const getOrderInfo = async ({ id, type }) => {
 exports.getOrderInfo = getOrderInfo;
 
 const delOrder = async ({ orderId }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`delete from \`order\` where id =  ?`, [orderId])
     );
     return { success: true, data, code: 0 };

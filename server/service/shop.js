@@ -1,13 +1,12 @@
-const { formatSql, getConnection, query } = require("../database");
+const { formatSql, query } = require("../database");
 const { parseSqlError } = require("../utils");
 /**
  * 创建新的商店信息
  * @param {name, area, type, desc, cardInfo, userId}
  */
 const create = async ({ name, area, type, desc, userId, path }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`insert into shop set ?`, [
         { name, area, type, desc, userId, imgPath: path },
       ])
@@ -31,10 +30,9 @@ exports.create = create;
  * @param {shopId ,limit,skip}
  */
 const getShop = async ({ shopId, type, limit, skip }) => {
-  const conn = await getConnection();
   try {
     const sql = type == 2 ? "" : `and c.type=${type}`;
-    const _total = await conn.queryAsync(
+    const _total = await query(
       formatSql(
         `select count(*) as total from  shop as s join coupon as c on s.id = c.shopId where s.id =? ${sql}`,
         [shopId]
@@ -42,7 +40,7 @@ const getShop = async ({ shopId, type, limit, skip }) => {
     );
     const { total } = _total[0];
     if (total && total > skip) {
-      const data = await conn.queryAsync(
+      const data = await query(
         formatSql(
           ` select  s.id as sid,s.name as sname, s.area,s.type as stype,s.desc,userId,s.imgPath simgPath,c.id as cid,c.name as cname,c.start,c.end,count ,c.imgPath as cimgPath,c.type as ctype,c.shopId from shop as s join coupon as c on s.id = c.shopId where s.id = ? ${sql} limit ?, ?`,
           [shopId, skip, limit]
@@ -78,11 +76,10 @@ exports.getShop = getShop;
  * @param {shopId,detail}
  */
 const modshop = async ({ shopId, detail }) => {
-  const conn = await getConnection();
   try {
     if (JSON.stringify(detail) == "{}")
       return { success: true, data: {}, code: 0 };
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`update shop set ? where id = ?`, [detail, shopId])
     );
     return { success: true, data, code: 0 };
@@ -101,15 +98,12 @@ const modshop = async ({ shopId, detail }) => {
 exports.modshop = modshop;
 
 const delShop = async ({ shopId }) => {
-  const conn = await getConnection();
   try {
     await conn.beginTransactionAsync();
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`delete from shop where id = ?`, [shopId])
     );
-    await conn.queryAsync(
-      formatSql(`delete from coupon where shopId = ?`, [shopId])
-    );
+    await query(formatSql(`delete from coupon where shopId = ?`, [shopId]));
     await conn.commitAsync();
     return { success: true, data, code: 0 };
   } catch (e) {
@@ -128,9 +122,8 @@ const delShop = async ({ shopId }) => {
 exports.delShop = delShop;
 
 const getShopDetail = async ({ shopId }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`select *  from shop where id = ?`, [shopId])
     );
     return { success: true, data, code: 0 };
@@ -150,9 +143,8 @@ const getShopDetail = async ({ shopId }) => {
 exports.getShopDetail = getShopDetail;
 
 const getShoplist = async () => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(formatSql(`select *  from shop `, []));
+    const data = await query(formatSql(`select *  from shop `, []));
     return { success: true, data, code: 0 };
   } catch (e) {
     await conn.rollbackAsync();
@@ -170,10 +162,9 @@ const getShoplist = async () => {
 exports.getShoplist = getShoplist;
 
 const shopSearch = async ({ key }) => {
-  const conn = await getConnection();
   try {
     key = `%${key}%`;
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`select *  from shop where name like ?`, [key])
     );
     return { success: true, data, code: 0 };

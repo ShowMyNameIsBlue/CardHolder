@@ -1,9 +1,4 @@
-const {
-  query,
-  formatSql,
-  getConnection,
-  hashpasssword,
-} = require("../database");
+const { query, formatSql, hashpasssword } = require("../database");
 const { parseSqlError } = require("../utils");
 const random = require("../utils/random");
 // const { common } = require("../config/dev");
@@ -37,7 +32,6 @@ const checkPassword = async (username, password, role) => {
  * @param {user}
  */
 const create = async (user) => {
-  const conn = await getConnection();
   try {
     const { username, password, role, code } = user;
     const _user = await query(
@@ -51,7 +45,7 @@ const create = async (user) => {
     } else {
       const encrypted = await hashpasssword(username, password);
       const uid = random(12, "number");
-      const _user = await conn.queryAsync(
+      const _user = await query(
         formatSql(`insert into user set ?`, [
           {
             username,
@@ -99,9 +93,8 @@ exports.login = login;
  *
  */
 const getUser = async ({ userId, role }) => {
-  const conn = await getConnection();
   try {
-    const _cardInfo = await conn.queryAsync(
+    const _cardInfo = await query(
       formatSql(`select cardInfo from card where userId = ?`, [userId])
     );
     const { cardInfo } = _cardInfo[0];
@@ -115,11 +108,11 @@ const getUser = async ({ userId, role }) => {
         sqlStr += `or id = ${e}`;
       });
       sqlStr = sqlStr.replace("or", "");
-      _couponInfo = await conn.queryAsync(
+      _couponInfo = await query(
         formatSql(`select * from coupon where ${sqlStr}`)
       );
     }
-    const user = await conn.queryAsync(
+    const user = await query(
       formatSql(
         `select * from user join customer on user.id = userId where user.id = ? and  user.role = ?`,
         [userId, role]
@@ -146,7 +139,6 @@ exports.getUser = getUser;
  * @param {userId, username, oldPwd, newPwd}
  */
 const changePwd = async ({ userId, username, oldPwd, newPwd, role }) => {
-  const conn = await getConnection();
   try {
     await conn.beginTransactionAsync();
   } catch (e) {
@@ -157,7 +149,7 @@ const changePwd = async ({ userId, username, oldPwd, newPwd, role }) => {
     const result = await checkPassword(username, oldPwd, role);
     const encrypted = await hashpasssword(username, newPwd);
     if (result.match) {
-      const data = await conn.queryAsync(
+      const data = await query(
         formatSql(`update user set password = ? where id = ?`, [
           encrypted,
           userId,

@@ -1,13 +1,12 @@
-const { formatSql, query, getConnection } = require("../database");
+const { formatSql, query } = require("../database");
 const { parseSqlError } = require("../utils");
 /**
  * 创建消费者信息
  * @param {name, gender, number, area, userId }
  */
 const create = async ({ name, gender, number, area, userId }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`insert into customer set ?`, [
         { name, gender, number, area, userId },
       ])
@@ -31,11 +30,10 @@ exports.create = create;
  * @param {customerId, detail}
  */
 const ModCustomer = async ({ customerId, detail }) => {
-  const conn = await getConnection();
   try {
     if (JSON.stringify(detail) == "{}")
       return { success: true, data: {}, code: 0 };
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`update customer set ? where id = ?`, [detail, customerId])
     );
     return { success: true, data, code: 0 };

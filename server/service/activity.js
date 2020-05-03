@@ -1,4 +1,4 @@
-const { getConnection, formatSql } = require("../database");
+const { query, formatSql } = require("../database");
 const { parseSqlError } = require("../utils");
 
 /**
@@ -6,9 +6,8 @@ const { parseSqlError } = require("../utils");
  * @param { name, couponId, shopId, start, end, desc}
  */
 const create = async ({ name, couponId, shopId, start, end, desc }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`insert into activity set ?`, [
         { name, couponId, shopId, start, end, desc },
       ])
@@ -32,10 +31,9 @@ exports.create = create;
  * @param {id, type} 0,1,2 详细信息，商店关信息，卡券信息
  */
 const getActivity = async ({ id, type }) => {
-  const conn = await getConnection();
   try {
     let target = type == "0" ? "id" : type == "1" ? "shopId" : "couponId";
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`select * from activity where ${target} = ?`, [id])
     );
     return { success: true, data, code: 0 };
@@ -58,9 +56,8 @@ exports.getActivity = getActivity;
  * @param { activityId, detail}
  */
 const modActivity = async ({ activityId, detail }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`update activity set ? where id = ?`, [detail, activityId])
     );
     return { success: true, data, code: 0 };
@@ -79,9 +76,8 @@ const modActivity = async ({ activityId, detail }) => {
 exports.modActivity = modActivity;
 
 const delActivity = async ({ activityId }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`delete from activity where id = ?`, [activityId])
     );
     return { success: true, data, code: 0 };
@@ -100,10 +96,9 @@ const delActivity = async ({ activityId }) => {
 exports.delActivity = delActivity;
 
 const getActImage = async (activityId) => {
-  const conn = await getConnection();
   activityId = activityId ? `where a.id =${activityId}` : "";
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(
         `select a.id , a.name ,couponId,a.shopId ,a.start,a.end,a.desc,c.imgPath from activity as a join coupon as c on a.couponId = c.id  ${activityId}`
       )

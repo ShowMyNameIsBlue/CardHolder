@@ -1,4 +1,4 @@
-const { getConnection, formatSql } = require("../database");
+const { query, formatSql } = require("../database");
 const { parseSqlError } = require("../utils");
 
 /**
@@ -6,10 +6,9 @@ const { parseSqlError } = require("../utils");
  * @param {shopId,commentInfo}
  */
 const create = async ({ shopId, commentInfo }) => {
-  const conn = await getConnection();
   try {
     commentInfo = JSON.stringify(commentInfo);
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`insert into comment set ?`, [{ shopId, commentInfo }])
     );
     return { success: true, data, code: 0 };
@@ -32,9 +31,8 @@ exports.create = create;
  * @param {shopId}
  */
 const getComment = async ({ shopId }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`select * from comment where id = ?`, [shopId])
     );
     return { success: true, data, code: 0 };

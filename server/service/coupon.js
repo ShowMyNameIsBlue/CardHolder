@@ -1,4 +1,4 @@
-const { getConnection, formatSql } = require("../database");
+const { query, formatSql } = require("../database");
 const { parseSqlError } = require("../utils");
 /**
  * 创建卡券信息
@@ -15,14 +15,11 @@ const create = async ({
   shopId,
   imgPath,
 }) => {
-  const conn = await getConnection();
   try {
     const body = imgPath
       ? { name, number, start, end, count, type, shopId, imgPath }
       : { name, number, start, end, count, type, shopId };
-    const data = await conn.queryAsync(
-      formatSql(`insert into coupon set ?`, [body])
-    );
+    const data = await query(formatSql(`insert into coupon set ?`, [body]));
     return { success: true, data, code: 0 };
   } catch (e) {
     console.error(e);
@@ -43,11 +40,10 @@ exports.create = create;
  * @param { couponId, detail}
  */
 const modCoupon = async ({ couponId, detail }) => {
-  const conn = await getConnection();
   try {
     if (JSON.stringify(detail) == "{}")
       return { success: true, data: {}, code: 0 };
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`update coupon set ? where id = ?`, [detail, couponId])
     );
     return { success: true, data, code: 0 };
@@ -70,13 +66,12 @@ exports.modCoupon = modCoupon;
  * @param { couponId}
  */
 const delCoupon = async ({ couponId }) => {
-  const conn = await getConnection();
   try {
     const _path = await query(
       formatSql(`select imgPath from coupon where id = ?`, [couponId])
     );
     const { imgPath } = _path[0];
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`delete from coupon where id = ?`, [couponId])
     );
     return { success: true, data, code: 0 };
@@ -95,9 +90,8 @@ const delCoupon = async ({ couponId }) => {
 exports.delCoupon = delCoupon;
 
 const getCoupon = async ({ couponId }) => {
-  const conn = await getConnection();
   try {
-    const data = await conn.queryAsync(
+    const data = await query(
       formatSql(`select * from coupon where id = ?`, [couponId])
     );
     return { success: true, data, code: 0 };
