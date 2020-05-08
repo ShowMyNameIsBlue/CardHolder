@@ -7,11 +7,29 @@ const { parseSqlError } = require("../utils");
  */
 const create = async ({ shopId, commentInfo }) => {
   try {
-    commentInfo = JSON.stringify(commentInfo);
-    const data = await query(
-      formatSql(`insert into comment set ?`, [{ shopId, commentInfo }])
+    const _total = await query(
+      formatSql(`select * from comment where shopId = ?`, [shopId])
     );
-    return { success: true, data, code: 0 };
+    if (_total.length) {
+      let detail = _total[0].commentInfo;
+      detail = JSON.parse(detail);
+      detail.push(commentInfo);
+      commentInfo = JSON.stringify(detail);
+      const data = await query(
+        formatSql(`update comment set ? where shopId = ?`, [
+          { commentInfo },
+          shopId,
+        ])
+      );
+      return { success: true, data, code: 0 };
+    } else {
+      const data = await query(
+        formatSql(`insert into comment set ?`, [
+          { shopId, commentInfo: JSON.stringify([commentInfo]) },
+        ])
+      );
+      return { success: true, data, code: 0 };
+    }
   } catch (e) {
     console.error(e);
     return e.msg && e.code
@@ -33,7 +51,7 @@ exports.create = create;
 const getComment = async ({ shopId }) => {
   try {
     const data = await query(
-      formatSql(`select * from comment where id = ?`, [shopId])
+      formatSql(`select * from comment where shopId = ?`, [shopId])
     );
     return { success: true, data, code: 0 };
   } catch (e) {

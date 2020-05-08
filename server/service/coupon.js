@@ -108,3 +108,38 @@ const getCoupon = async ({ couponId }) => {
 };
 
 exports.getCoupon = getCoupon;
+
+const getCount = async ({ shopId }) => {
+  try {
+    const _vip = await query(
+      formatSql(
+        `select sum(usecount)as total from coupon where shopId = ? and type = 0`,
+        [shopId]
+      )
+    );
+    const _coupon = await query(
+      formatSql(
+        `select sum(usecount)as total from coupon where shopId = ? and type = 1`,
+        [shopId]
+      )
+    );
+    return {
+      success: true,
+      data: {
+        vip: _vip[0].total ? _vip[0].total : 0,
+        coupon: _coupon[0].total ? _coupon[0].total : 0,
+      },
+      code: 0,
+    };
+  } catch (error) {
+    return e.msg && e.code
+      ? e
+      : {
+          success: false,
+          code: 500,
+          msg: parseSqlError(e) || "user service: 数据库获取活动信息操作失败",
+        };
+  }
+};
+
+exports.getCount = getCount;

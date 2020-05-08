@@ -60,6 +60,23 @@ router.post("/sigin", async (ctx) => {
   }
 });
 
+router.get("/detail/:id", sessionAuth, async (ctx) => {
+  if (!ctx.params.id) ctx.throw(400, "userId is required");
+
+  const { id } = ctx.params;
+  const result = await User.get({ userId: id });
+  if (result.success) {
+    const { data, code } = result;
+    ctx.body = { data, code };
+  } else {
+    ctx.body = {
+      code: result.code,
+      msg: result.msg,
+    };
+    ctx.throw(result.code, result.msg);
+  }
+});
+
 /**
  * 获取用户信息
  */
@@ -118,6 +135,7 @@ module.exports = router;
  */
 router.post("/exit", sessionAuth, async (ctx) => {
   if (ctx.session.user) {
+    console.log("ok");
     delete ctx.session.user;
     return { data: "ok", code: 0 };
   } else {

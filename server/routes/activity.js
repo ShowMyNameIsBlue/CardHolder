@@ -74,6 +74,22 @@ router.get("/actImage", async (ctx) => {
   }
 });
 
+router.get("/count/:id", async (ctx) => {
+  if (!ctx.params.id) ctx.throw(400, "shopId is required");
+  const shopId = ctx.params.id;
+  const result = await Activity.getCount({ shopId });
+  if (result.success) {
+    const { data, code } = result;
+    ctx.body = { data, code };
+  } else {
+    ctx.body = {
+      code: result.code,
+      msg: result.msg,
+    };
+    ctx.throw(result.code, result.msg);
+  }
+});
+
 router.get("/:id", async (ctx) => {
   if (!ctx.params.id) ctx.throw(400, "Id is required");
   required({ query: ["type"] }, ctx);

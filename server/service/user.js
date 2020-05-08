@@ -94,33 +94,46 @@ exports.login = login;
  */
 const getUser = async ({ userId, role }) => {
   try {
-    const _cardInfo = await query(
-      formatSql(`select cardInfo from card where userId = ?`, [userId])
-    );
-    const { cardInfo } = _cardInfo[0];
-    const cardArr = JSON.parse(cardInfo);
-    let _couponInfo;
-    if (cardArr.length == 0) {
-      _couponInfo = [];
-    } else {
-      let sqlStr = "";
-      cardArr.forEach((e) => {
-        sqlStr += `or id = ${e}`;
-      });
-      sqlStr = sqlStr.replace("or", "");
-      _couponInfo = await query(
-        formatSql(`select * from coupon where ${sqlStr}`)
-      );
-    }
-    const user = await query(
-      formatSql(
-        `select * from user join customer on user.id = userId where user.id = ? and  user.role = ?`,
-        [userId, role]
-      )
-    );
+    // const _cardInfo = await query(
+    //   formatSql(`select cardInfo from card where userId = ?`, [userId])
+    // );
+    // const { cardInfo } = _cardInfo[0];
+    // const cardArr = JSON.parse(cardInfo);
+    // let _couponInfo;
+    // if (cardArr.length == 0) {
+    //   _couponInfo = [];
+    // } else {
+    //   let sqlStr = "";
+    //   cardArr.forEach((e) => {
+    //     sqlStr += `or id = ${e}`;
+    //   });
+    //   sqlStr = sqlStr.replace("or", "");
+    //   _couponInfo = await query(
+    //     formatSql(`select * from coupon where ${sqlStr}`)
+    //   );
+    // }
+    // const user = await query(
+    //   formatSql(
+    //     `select * from user join customer on user.id = userId where user.id = ? and  user.role = ?`,
+    //     [userId, role]
+    //   )
+    // );
 
-    const data = { user, couponInfo: _couponInfo };
-    return { success: true, data, code: 0 };
+    // const data = { user, couponInfo: _couponInfo };
+    if (parseInt(role)) {
+      const data = await query(
+        formatSql(
+          `select * from user join shop on user.id = shop.userId where user.id = ?`,
+          [userId]
+        )
+      );
+      return { success: true, data, code: 0 };
+    } else {
+      const data = await query(
+        formatSql(`select * from user where id = ?`, [userId])
+      );
+      return { success: true, data, code: 0 };
+    }
   } catch (e) {
     console.error(e);
     return e.code && e.msg
@@ -180,3 +193,27 @@ const changePwd = async ({ userId, username, oldPwd, newPwd, role }) => {
   }
 };
 exports.changePwd = changePwd;
+
+const get = async ({ userId }) => {
+  try {
+    const data = await query(
+      formatSql(
+        `select * from user join customer on user.id = customer.id where user.id = ?`,
+        [userId]
+      )
+    );
+    return { success: true, data, code: 0 };
+  } catch (e) {
+    console.error(e);
+    await conn.rollbackAsync();
+    return e.msg && e.code
+      ? e
+      : parseSqlError(e) || {
+          success: false,
+          code: 500,
+          msg: "修改事务执行失败",
+        };
+  }
+};
+
+exports.get = get;

@@ -4,6 +4,7 @@ const Shop = require("../service/shop");
 const { required } = require("../utils");
 
 router.post("/create", async (ctx) => {
+  console.log(ctx.request.body);
   required({ body: ["name", "area", "type", "desc", "userId", "path"] }, ctx);
   const { name, area, type, desc, userId, path } = ctx.request.body;
   const result = await Shop.create({ name, area, type, desc, userId, path });

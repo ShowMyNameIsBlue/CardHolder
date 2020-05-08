@@ -117,3 +117,26 @@ const getActImage = async (activityId) => {
 };
 
 exports.getActImage = getActImage;
+
+const getCount = async ({ shopId }) => {
+  try {
+    const _total = await query(
+      formatSql(
+        `select sum(usecount)  as total from activity where shopId = ?`,
+        [shopId]
+      )
+    );
+    const { total } = _total[0];
+    return { success: true, data: total, code: 0 };
+  } catch (error) {
+    return e.msg && e.code
+      ? e
+      : {
+          success: false,
+          code: 500,
+          msg: parseSqlError(e) || "user service: 数据库获取活动信息操作失败",
+        };
+  }
+};
+
+exports.getCount = getCount;

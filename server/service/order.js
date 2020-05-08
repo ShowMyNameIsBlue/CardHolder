@@ -5,14 +5,32 @@ const { parseSqlError } = require("../utils");
  * 创建预约信息
  * @param { userId, shopId, start, end}
  */
-const create = async ({ userId, username, shopId, start, end, content }) => {
+const create = async ({
+  userId,
+  username,
+  shopId,
+  start,
+  end,
+  content,
+  shopname,
+}) => {
   try {
-    const data = await query(
-      formatSql(`insert into \`order\` set ?`, [
-        { userId, shopId, start, end, content, username },
-      ])
+    const _total = await query(
+      formatSql(
+        `select * from \`order\` where ( start between  ? and ? or  end  between  ? and ?) and shopId = ?`,
+        [start, end, start, end, shopId]
+      )
     );
-    return { success: true, data, code: 0 };
+    if (_total.length > 0) {
+      return { success: true, data: [], code: 1 };
+    } else {
+      const data = await query(
+        formatSql(`insert into \`order\` set ?`, [
+          { userId, shopId, start, end, content, username, shopname },
+        ])
+      );
+      return { success: true, data, code: 0 };
+    }
   } catch (e) {
     console.error(e);
     return e.msg && e.code

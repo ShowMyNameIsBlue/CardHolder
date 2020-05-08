@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS  `order` (
   `shopId` int(11) NOT NULL,
   `userId` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
+  `shopname` varchar(50) NOT NULL,
   `start` datetime NOT NULL,
   `end` datetime NOT NULL,
   `status` int(1) NOT NULL DEFAULT 0,

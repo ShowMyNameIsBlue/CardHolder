@@ -6,10 +6,28 @@ const { customerAuth } = require("../auth");
 
 router.post("/create", customerAuth, async (ctx) => {
   required(
-    { body: ["userId", "shopId", "start", "end", "content", "username"] },
+    {
+      body: [
+        "userId",
+        "shopId",
+        "start",
+        "end",
+        "content",
+        "username",
+        "shopname",
+      ],
+    },
     ctx
   );
-  const { userId, shopId, start, end, content, username } = ctx.request.body;
+  const {
+    userId,
+    shopId,
+    start,
+    end,
+    content,
+    username,
+    shopname,
+  } = ctx.request.body;
   const result = await Order.create({
     userId,
     shopId,
@@ -17,6 +35,7 @@ router.post("/create", customerAuth, async (ctx) => {
     end,
     content,
     username,
+    shopname,
   });
   if (result.success) {
     const { data, code } = result;

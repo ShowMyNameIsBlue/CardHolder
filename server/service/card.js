@@ -30,10 +30,24 @@ exports.create = create;
  */
 const getCardInfo = async ({ userId }) => {
   try {
-    const data = await query(
+    const _cards = await query(
       formatSql(`select * from card where userId =  ?`, [userId])
     );
-    return { success: true, data, code: 0 };
+    if (_cards.length) {
+      let { cardInfo } = _cards[0];
+      cardInfo = JSON.parse(cardInfo);
+      let sql = "";
+      cardInfo.forEach((e) => {
+        sql += `${e},`;
+      });
+      sql = `(${sql.slice(0, sql.length - 1)})`;
+      const data = await query(
+        formatSql(`select * from coupon where id in ${sql}`, [])
+      );
+      return { success: true, data, code: 0 };
+    } else {
+      return { success: true, data: [], code: 0 };
+    }
   } catch (e) {
     console.error(e);
     return e.msg && e.code
@@ -59,18 +73,26 @@ const modCardInfo = async ({ userId, shopId, couponId, detail }) => {
     if (_total.length) {
       let { cardInfo } = _total[0];
       cardInfo = JSON.parse(cardInfo);
-      cardInfo.push(detail);
-      cardInfo = JSON.stringify(cardInfo);
-      const data = await query(
-        formatSql(`update card set ? where userId = ?`, [{ cardInfo }, userId])
-      );
-      await query(
-        formatSql(
-          `update coupon set usecount=usecount+1 where id =? and shopId=?`,
-          [couponId, shopId]
-        )
-      );
-      return { success: true, data, code: 0 };
+      if (cardInfo.indexOf(detail) != -1) {
+        return { success: true, data: [], code: 1 };
+      } else {
+        cardInfo.push(detail);
+        cardInfo = JSON.stringify(cardInfo);
+
+        const data = await query(
+          formatSql(`update card set ? where userId = ?`, [
+            { cardInfo },
+            userId,
+          ])
+        );
+        await query(
+          formatSql(
+            `update coupon set usecount=usecount+1 where id =? and shopId=?`,
+            [couponId, shopId]
+          )
+        );
+        return { success: true, data, code: 0 };
+      }
     } else {
       const data = await query(
         formatSql(`insert into card set ?`, [
